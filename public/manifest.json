@@ -1,0 +1,21 @@
+{
+  "short_name": "TELC Memorizer",
+  "name": "TELC Memorizer - محفظ منهجيات ومُدرّب الكتابة B2",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "/icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#020617",
+  "theme_color": "#14b8a6",
+  "display": "standalone",
+  "orientation": "any"
+}

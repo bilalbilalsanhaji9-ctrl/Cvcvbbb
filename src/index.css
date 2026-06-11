@@ -1,0 +1,46 @@
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;450;600;700;800;900&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Cairo", "Inter", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", Courier, monospace;
+}
+
+/* Custom caret animations */
+@keyframes blink {
+  50% { opacity: 0; }
+}
+
+.caret-custom {
+  animation: blink 1s step-end infinite;
+}
+
+/* Custom scrollbars for clean Monkeytype layout */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.15);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.35);
+}
+
+/* RTL Helpers as defaults */
+body {
+  direction: rtl;
+}
+
+/* Force LTR specifically for German typing, code and references */
+[dir="ltr"] {
+  direction: ltr;
+}
+

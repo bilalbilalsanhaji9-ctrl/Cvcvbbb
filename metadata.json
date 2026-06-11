@@ -1,0 +1,6 @@
+{
+  "name": "TELC Memorizer",
+  "description": "An offline training suite designed to help students memorize, practice, split, and examine German TELC B2 essay templates and letter-writing skills.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
