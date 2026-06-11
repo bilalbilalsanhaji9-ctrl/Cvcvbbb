@@ -20,6 +20,7 @@ interface FolderManagerProps {
   onDeleteMethodology: (id: string) => void;
   onAddFolder: (nameAr: string, nameDe: string) => void;
   onSelectForTraining: (m: Methodology, mode: 'learn' | 'exam') => void;
+  onRestoreDefaults: () => void;
 }
 
 export default function FolderManager({
@@ -30,6 +31,7 @@ export default function FolderManager({
   onDeleteMethodology,
   onAddFolder,
   onSelectForTraining,
+  onRestoreDefaults,
 }: FolderManagerProps) {
   const [selectedFolderId, setSelectedFolderId] = useState<string>(folders[0]?.id || '');
   const [searchQuery, setSearchQuery] = useState('');
@@ -160,6 +162,14 @@ export default function FolderManager({
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
+          <button
+            id="btn-restore-defaults"
+            onClick={onRestoreDefaults}
+            className="flex items-center gap-1.5 px-3 py-1.8 text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-xl hover:bg-emerald-500/20 transition"
+          >
+            <Sparkles className="h-3.5 w-3.5 text-emerald-400" />
+            <span>مزامنة/استعادة الـ 21 موضوعاً</span>
+          </button>
           <button
             id="btn-add-folder"
             onClick={() => setIsAddingFolder(true)}

@@ -19,18 +19,36 @@ import SajjelTaqaddomPanel from './components/SajjelTaqaddomPanel';
 // Icons / Utilities
 import { Award, BookOpen, Layers, BarChart2, ShieldCheck, Keyboard, HelpCircle } from 'lucide-react';
 
+function fixGermanSalutationCapitalization(content: string): string {
+  // Finds salutations ending with a comma (Sehr geehrte Damen und Herren,, etc.), 
+  // and lowercases the first character of the immediate next paragraph.
+  return content.replace(
+    /(Sehr\s+geehrte[r]?\s+[^,]+,\s*\n+)([A-Z]|[\u00C0-\u00D6\u00D8-\u00DC])/g,
+    (match, salutation, firstChar) => {
+      return salutation + firstChar.toLowerCase();
+    }
+  );
+}
+
 export default function App() {
   // -----------------------------------------
   // 1. Initial State Loading from LocalStorage
   // -----------------------------------------
   const [folders, setFolders] = useState<Folder[]>(() => {
     const local = localStorage.getItem('telc_folders');
-    return local ? JSON.parse(local) : DEFAULT_FOLDERS;
+    const loaded: Folder[] = local ? JSON.parse(local) : DEFAULT_FOLDERS;
+    return loaded.filter(f => f.id !== 'meinung' && f.id !== 'anfrage' && f.id !== 'bewerbung');
   });
 
   const [methodologies, setMethodologies] = useState<Methodology[]>(() => {
     const local = localStorage.getItem('telc_methodologies');
-    return local ? JSON.parse(local) : DEFAULT_METHODOLOGIES;
+    const loaded: Methodology[] = local ? JSON.parse(local) : DEFAULT_METHODOLOGIES;
+    return loaded
+      .filter(m => m.folderId !== 'meinung' && m.folderId !== 'anfrage' && m.folderId !== 'bewerbung')
+      .map(m => ({
+        ...m,
+        content: fixGermanSalutationCapitalization(m.content)
+      }));
   });
 
   const [sessions, setSessions] = useState<Session[]>(() => {
@@ -84,6 +102,7 @@ export default function App() {
   const handleAddMethodology = (newM: Omit<Methodology, 'id' | 'createdAt' | 'mastery'>) => {
     const fresh: Methodology = {
       ...newM,
+      content: fixGermanSalutationCapitalization(newM.content),
       id: `m-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       mastery: 0,
       createdAt: Date.now(),
@@ -94,7 +113,11 @@ export default function App() {
   const handleEditMethodology = (id: string, updates: Partial<Methodology>) => {
     setMethodologies(prev => prev.map(m => {
       if (m.id === id) {
-        return { ...m, ...updates };
+        const revisedUpdates = { ...updates };
+        if (updates.content) {
+          revisedUpdates.content = fixGermanSalutationCapitalization(updates.content);
+        }
+        return { ...m, ...revisedUpdates };
       }
       return m;
     }));
@@ -102,6 +125,26 @@ export default function App() {
 
   const handleDeleteMethodology = (id: string) => {
     setMethodologies(prev => prev.filter(m => m.id !== id));
+  };
+
+  const handleRestoreDefaults = () => {
+    setMethodologies(prev => {
+      const existingIds = new Set(prev.map(m => m.id));
+      const missing = DEFAULT_METHODOLOGIES.filter(m => !existingIds.has(m.id));
+      if (missing.length === 0) {
+        if (confirm('جميع مواضيع الكتابة الـ 21 موجودة ومحدثة بالفعل في جهازك. هل تود إعادة تعيين القائمة بالكامل (ما سيحذف المواضيع التي أضفتها بنفسك)؟')) {
+          return DEFAULT_METHODOLOGIES.map(m => ({
+            ...m,
+            content: fixGermanSalutationCapitalization(m.content)
+          }));
+        }
+        return prev;
+      }
+      return [...prev, ...missing.map(m => ({
+        ...m,
+        content: fixGermanSalutationCapitalization(m.content)
+      }))];
+    });
   };
 
   const handleAddFolder = (nameAr: string, nameDe: string) => {
@@ -236,6 +279,7 @@ export default function App() {
                     onDeleteMethodology={handleDeleteMethodology}
                     onAddFolder={handleAddFolder}
                     onSelectForTraining={handleSelectForTraining}
+                    onRestoreDefaults={handleRestoreDefaults}
                   />
                 )}
 
@@ -244,6 +288,7 @@ export default function App() {
                     methodologies={methodologies}
                     selectedText={activePracticeText}
                     onSessionComplete={handleSessionComplete}
+                    onEditMethodology={handleEditMethodology}
                   />
                 )}
 
