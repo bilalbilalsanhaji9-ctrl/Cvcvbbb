@@ -61,6 +61,11 @@ export default function App() {
     return (local as any) || 'dark';
   });
 
+  const [appLanguage, setAppLanguage] = useState<'ar' | 'de'>(() => {
+    const local = localStorage.getItem('telc_language');
+    return (local as 'ar' | 'de') || 'ar';
+  });
+
   // Navigation and dynamic targeting states
   const [currentView, setCurrentView] = useState<'folders' | 'learn' | 'exam' | 'history'>('folders');
   const [activePracticeText, setActivePracticeText] = useState<Methodology | null>(null);
@@ -88,6 +93,19 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem('telc_theme', theme);
   }, [theme]);
+
+  useEffect(() => {
+    localStorage.setItem('telc_language', appLanguage);
+    const root = document.documentElement;
+    // Set system direction to match active interface language
+    if (appLanguage === 'de') {
+      root.setAttribute('dir', 'ltr');
+      document.body.style.direction = 'ltr';
+    } else {
+      root.setAttribute('dir', 'rtl');
+      document.body.style.direction = 'rtl';
+    }
+  }, [appLanguage]);
 
   // Apply theme class names to body/html context
   useEffect(() => {
@@ -238,6 +256,8 @@ export default function App() {
         }} 
         theme={theme}
         onThemeChange={(t) => setTheme(t)}
+        appLanguage={appLanguage}
+        onChangeLanguage={setAppLanguage}
       />
 
       {/* 2. Main Area Container */}
@@ -289,6 +309,7 @@ export default function App() {
                     selectedText={activePracticeText}
                     onSessionComplete={handleSessionComplete}
                     onEditMethodology={handleEditMethodology}
+                    appLanguage={appLanguage}
                   />
                 )}
 

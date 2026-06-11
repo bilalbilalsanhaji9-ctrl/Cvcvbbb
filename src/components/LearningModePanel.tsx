@@ -15,11 +15,387 @@ import { Languages, Layers, Split } from 'lucide-react';
 import { segmentAndTranslateLetter } from '../utils/topicSegmenter';
 import { motion, AnimatePresence } from 'motion/react';
 
+// ================= OFFLINE COMPREHENSIVE DICTIONARY (100% LOCAL) =================
+const GERMAN_TO_ARABIC_DICT: Record<string, string> = {
+  "sehr": "جدًا",
+  "geehrte": "المحترمة/الموقرة",
+  "geehrter": "المحترم/الموقر",
+  "damen": "سيدات",
+  "und": "و",
+  "herren": "سادة",
+  "mit": "مع / بواسطة",
+  "freundlichen": "ودّي / طيب",
+  "grüßen": "تحياتي",
+  "max": "ماكس",
+  "mustermann": "موسترمان (اسم علم افتراضي)",
+  "durch": "من خلال / عبر",
+  "ihre": "إعلانكم الخاص",
+  "anzeige": "إشهار / إعلان",
+  "wurde": "تم / أصبح",
+  "ich": "أنا",
+  "auf": "على / منتبه لـ",
+  "ihr": "عرضكم",
+  "angebot": "الطلب / العرض",
+  "aufmerksam": "منتبهاً / متيقظاً",
+  "da": "بما أن / لأن",
+  "einen": "أداة مفرد مذكر",
+  "guten": "جيد / ممتاز",
+  "eindruck": "انطباعاً",
+  "machte": "ترك / صنع",
+  "entschied": "قررتُ",
+  "mich": "نفسي",
+  "dafür": "لأجل ذلك / السير فيه",
+  "leider": "مع الأسف / للأسف",
+  "musste": "اضطررتُ / تعين علي",
+  "feststellen": "أن أجد / أن ألاحظ",
+  "dass": "بأن / أن",
+  "die": "أداة التعريف",
+  "realität": "الواقع",
+  "nicht": "ليس / لا (نفي)",
+  "angaben": "المواصفات / البيانات",
+  "entsprach": "طابقت / ناسبت",
+  "deshalb": "لذا / بناء على ذلك",
+  "sehe": "أرى",
+  "veranlasst": "مضطراً / مدفوعاً",
+  "ihnen": "إليكم / لكم",
+  "diese": "هذه",
+  "beschwerde": "الشكوى / التظلم",
+  "zu": "أن / إلى",
+  "schreiben": "أكتب",
+  "zunächst": "في البداية / بادئ ذي بدء",
+  "möchte": "أود / أرغب في",
+  "erwähnen": "أن أذكر / أنوه",
+  "gelieferte": "المسلمة / المرسلة",
+  "komfort-matratze": "مرتبة سرير مريحة",
+  "matratze": "مرتبة النوم",
+  "extrem": "للغاية / بحدة",
+  "hart": "قاسية / صلبة",
+  "ist": "تكون / هي",
+  "überhaupt": "إطلاقاً",
+  "versprochenen": "الموعود بها",
+  "schlafgefühl": "تجربة النوم المريحة",
+  "entspricht": "تطابق/تناسب",
+  "außerdem": "بالإضافة لـ/علاوة على ذلك",
+  "muss": "يجب / يتوجب",
+  "darauf": "على هذا الأمر",
+  "hinweisen": "أن أشير / ألفت نظركم",
+  "lieferung": "الشحن / التوصيل",
+  "statt": "بدلاً من",
+  "zwei": "يومين",
+  "werktage": "أيام عمل",
+  "über": "استغرقت أكثر من",
+  "drei": "ثلاثة",
+  "wochen": "أسابيع",
+  "gedauert": "استغرقت / دامت",
+  "hat": "فعل مساعد",
+  "darüber": "بالإضافة",
+  "hinaus": "لذلك / للأبعد",
+  "war": "كانت",
+  "besonders": "بشكل خاص / خصوصاً",
+  "enttäuscht": "محبطاً / خائب الأمل",
+  "lieferfahrer": "سائق التوصيل",
+  "sich": "إن نفسه",
+  "weigerte": "امتنع / رفض",
+  "meine": "الخاصة بي",
+  "alte": "القديمة",
+  "mitzunehmen": "أن يصحبها معه / يسترجعها",
+  "obwohl": "رغم أن / مع أن",
+  "extra": "إضافياً / مخصوص",
+  "bezahlt": "دفعتُ هجاءه",
+  "hatte": "كنت قد فعلت",
+  "aus": "من",
+  "diesem": "هذا (مجرور)",
+  "grund": "السبب",
+  "erwarte": "أنتظر / أطالب بـ",
+  "eine": "أداة نكرة للمؤنث",
+  "angemessene": "عادلة / مقبولة",
+  "entschädigung": "التعويض المالي / جبر الضرر",
+  "beziehungsweise": "أو بالأحرى",
+  "stellungnahme": "توضيح رسمي / رد كتابي",
+  "ihrerseits": "من طرفكم / من جانبكم",
+  "hoffe": "آمل / أرجو",
+  "ernst": "بجدية كاملة",
+  "nehmen": "أن تأخذوا",
+  "entsprechende": "مناسبة / فورية",
+  "maßnahmen": "إجراءات تصحيحية",
+  "ergreifen": "تتخذوا/تطبقوا",
+  "sehen": "أرجو / أنظر",
+  "baldigen": "العاجل / القريب",
+  "antwort": "الرد / الجواب",
+  "erwartung": "بفارغ الصبر / انتظار",
+  "entgegen": "مستقبلاً لـ",
+  "käse": "جبْن",
+  "schmelzkäse": "الجبنة الذائبة/المطبوخة",
+  "magen-darm": "المعدة والأمعاء",
+  "plastikstücke": "قطع بلاستيكية ضارة",
+  "günstig": "اقتصادي / موفر",
+  "qualität": "الجودة / المواد",
+  "frische": "الطراوة / الطزاجة",
+  "gesundheitsrisiko": "خطر صحي على العائلة",
+  "verzehr": "تناول / أكل",
+  "magenschmerzen": "آلام حادة في البطن",
+  "litt": "عانى",
+  "litten": "عانوا بشدة",
+  "familienmitglieder": "أفراد العائلة/الأسرة",
+  "obstkiste": "صندوق فواكه جافة",
+  "obstabo": "الاشتراك الدوري الأخضر",
+  "gemüses": "الخضروات",
+  "faul": "عفناً / تالفاً",
+  "ungenießbar": "غير صالح للأكل البشري",
+  "verspätet": "متأخراً عن موعده",
+  "verschmutzt": "متسخاً / مليئاً بالأوساخ",
+  "staubsauger": "مكنسة كهربائية",
+  "roboter": "جهاز آلي / روبوت",
+  "staubsaugroboter": "المكنسة الروبوت الذكية",
+  "leise": "هادئ / صامت العمل",
+  "laut": "مزعج / صاخب الصوت",
+  "möbel": "الأثاث المنزلي الرائع",
+  "verbindung": "اتصال شبكي",
+  "gerät": "الجهاز الذكي",
+  "hotel": "فندق الإقامة",
+  "hoteltherme": "فندق المنتجع الاستجمامي الصحي",
+  "balkon": "شرفة الغرفة",
+  "therme": "حمامات دافئة / مسابح حرارية",
+  "reiseleiter": "المرشد السياحي المرافق",
+  "zimmer": "غرفة النوم المخصصة",
+  "straße": "الشارع المطل",
+  "eiskalt": "شديد البرودة كالثلج",
+  "kurs": "الكورس / الدورة التطبيقية",
+  "dozent": "المحاضر / أستاذ الورشة",
+  "tapezieren": "تركيب وتلصيق ورق الجدران",
+  "streichen": "دهان وصباغة الجدران",
+  "teilnehmer": "المشتركين الآخرين",
+  "werkzeuge": "أدوات ومواد العمل",
+  "apartment": "شقة مجهزة",
+  "apartmenthaus": "بناية الشقق المستأجرة",
+  "heizung": "التدفئة المركزية لشتاء بارد",
+  "defekt": "معطلة تماماً عن العمل",
+  "reinigen": "تنظيف الغرف والسرير",
+  "fahrzeug": "مركبة القيادة",
+  "motor": "محرك السيارة",
+  "autovermietung": "شركة تأجير السيارات الفخمة",
+  "kundenservice": "موظفي خدمة العملاء",
+  "verein": "النادي / الجمعية المسؤولة",
+  "museum": "متحف التاريخ الطبيعي العريق",
+  "kulissen": "كواليس وخلفيات العرض",
+  "musical": "المسرحية الغنائية الموسيقية",
+  "mittagsessen": "وجبة الغذاء المتفق عليها",
+  "bremse": "الفرامل / كوابح الأمان للسيارة",
+  "sauna": "مقصورة البخار والساونا"
+};
+
+const TOPIC_IMAGES: Record<string, string> = {
+  'telc-b2-01-matratze': 'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?auto=format&fit=crop&w=650&q=80',
+  'telc-b2-02-kaese': 'https://images.unsplash.com/photo-1486299267070-83823f5448dd?auto=format&fit=crop&w=650&q=80',
+  'telc-b2-03-obstkiste': 'https://images.unsplash.com/photo-1610348725511-27a81172e270?auto=format&fit=crop&w=650&q=80',
+  'telc-b2-04-apps': 'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?auto=format&fit=crop&w=650&q=80',
+  'telc-b2-05-staubsauger': 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=650&q=80',
+  'telc-b2-06-hoteltherme': 'https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=650&q=80',
+  'telc-b2-07-reisebuero': 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=650&q=80',
+  'telc-b2-08-kursschulung': 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&w=650&q=80',
+  'telc-b2-09-wohndesign': 'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=650&q=80',
+  'telc-b2-10-renovierung': 'https://images.unsplash.com/photo-1562259949-e8e7689d7828?auto=format&fit=crop&w=650&q=80',
+  'telc-b2-11-engagement': 'https://images.unsplash.com/photo-1521791136368-1a9bde71138f?auto=format&fit=crop&w=650&q=80',
+  'telc-b2-12-apartmenthaus': 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=650&q=80',
+  'telc-b2-13-autovermietung': 'https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=650&q=80',
+  'telc-b2-14-freizeitverein': 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&w=650&q=80',
+  'telc-b2-15-naturmuseum': 'https://images.unsplash.com/photo-1566121318599-9bf6e1e1276a?auto=format&fit=crop&w=650&q=80',
+  'telc-b2-16-musical': 'https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?auto=format&fit=crop&w=650&q=80',
+  'telc-b2-17-kultur': 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=650&q=80',
+  'telc-b2-18-fahrradtour': 'https://images.unsplash.com/photo-1485965120184-e220f721d03e?auto=format&fit=crop&w=650&q=80',
+  'telc-b2-19-sprachkurs': 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&w=650&q=80',
+  'telc-b2-20-fitnessstudio': 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=650&q=80',
+  'telc-b2-21-onlineshopping': 'https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=650&q=80'
+};
+
+const DEFAULT_TOPIC_IMAGE = 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&w=650&q=80';
+
+const TOPIC_DESCRIPTIONS: Record<string, { ar: string; de: string }> = {
+  'telc-b2-01-matratze': {
+    de: 'Beschwerde: Komfort-Matratze',
+    ar: 'شكوى بخصوص مرتبة سرير مريحة لم تكن مطابقة للمواصفات ومماطلة في تسليمها لأكثر من 3 أسابيع.'
+  },
+  'telc-b2-02-kaese': {
+    de: 'Reklamation: Schmelzkäse',
+    ar: 'شكوى ضد مصنع أجبان بسبب العثور على قطع بلاستيكية خطيرة في الجبن وإصابة العائلة بمغص معوي.'
+  },
+  'telc-b2-03-obstkiste': {
+    de: 'Beschwerde: Bio-Obstkiste Abo',
+    ar: 'شكوى بخصوص اشتراك صندوق الخضار والفواكه الذي وصل تالفاً ومتسخاً ومتأخراً عن موعده.'
+  },
+  'telc-b2-04-apps': {
+    de: 'Beschwerde: Kostenlose Spiele-Apps',
+    ar: 'شكوى بخصوص تطبيقات ألعاب تم الترويج لها على أنها مجانية ولكن تم سحب اشتراك شهري باهظ من الحساب.'
+  },
+  'telc-b2-05-staubsauger': {
+    de: 'Beschwerde: Staubsaugroboter',
+    ar: 'شكوى بخصوص مكنسة روبوت ذكية ترتطم بعنف بالأثاث وتعمل بضجيج مرتفع مع فشل اتصالها بالتطبيق.'
+  },
+  'telc-b2-06-hoteltherme': {
+    de: 'Reklamation: Hotel und Therme',
+    ar: 'شكوى بشأن حجز فندقي وسبا بدون شرفة وبإطلالة على شارع صاخب مع برودة شديدة في مياه المسبح.'
+  },
+  'telc-b2-07-reisebuero': {
+    de: 'Beschwerde: Reisebüro Fehler',
+    ar: 'شكوى ضد وكالة سفريات بسبب إهمال تفاصيل الرحلة وفندق الإقامة السيء وعدم توافر المرشد السياحي.'
+  },
+  'telc-b2-08-kursschulung': {
+    de: 'Reklamation: Heimwerker-Kurs',
+    ar: 'شكوى بخصوص كورس أعمال يدوية وأصباغ جدران بسبب غياب الأدوات المطلوبة وضعف كفاءة المحاضر.'
+  },
+  'telc-b2-09-wohndesign': {
+    de: 'Beschwerde: Wohndesign Beratung',
+    ar: 'شكوى بخصوص استشارة تصميم منزلي لم تلبِ تفاصيل الاتفاق واحتوت على مقاسات وتصاميم مغلوطة.'
+  },
+  'telc-b2-10-renovierung': {
+    de: 'Beschwerde: Renovierungsarbeiten',
+    ar: 'شكوى حول أعمال تجديد وصباغة جدران منزلية تأخر العمال في إنهائها وتركوا المنزل في حالة فوضى عارمة.'
+  },
+  'telc-b2-11-engagement': {
+    de: 'Ehrenamtliches Engagement',
+    ar: 'شكوى أو توضيح بخصوص النادي والعمل التطوعي المنظم وعدم توفير تجهيزات للفعاليات.'
+  },
+  'telc-b2-12-apartmenthaus': {
+    de: 'Reklamation: Apartmenthaus Mängel',
+    ar: 'شكوى وتظلم بخصوص عطل في التدفئة المركزية وتلوث في الغرف بإحدى العمارات السكنية المستأجرة.'
+  },
+  'telc-b2-13-autovermietung': {
+    de: 'Beschwerde: Autovermietung Mängel',
+    ar: 'شكوى ضد شركة لتأجير السيارات بسبب تسليم سيارة متهالكة بفرامل ضعيفة وتعامل سيء من خدمة العملاء.'
+  },
+  'telc-b2-14-freizeitverein': {
+    de: 'Beschwerde: Freizeitverein Programm',
+    ar: 'شكوى وتظلم بخصوص سوء تنظيم أنشطة ترفيهية بنادي الشباب وغياب الوجبات الغذائية المتفق عليها.'
+  },
+  'telc-b2-15-naturmuseum': {
+    de: 'Beschwerde: Naturkundemuseum',
+    ar: 'شكوى بخصوص زيارة للمتحف الطبيعي تضمنت كواليس ومعارض مغلقة وتقليل أوقات الجولات.'
+  },
+  'telc-b2-16-musical': {
+    de: 'Reklamation: Musical-Veranstaltung',
+    ar: 'شكوى بخصوص تذاكر عرض مسرحي غنائي تم إلغاء أجزاء منه أو بيع مقاعد مكررة في القاعة.'
+  },
+  'telc-b2-17-kultur': {
+    de: 'Beschwerde: Kulturfestival Mängel',
+    ar: 'شكوى وتظلم بخصوص مهرجان ثقافي وفني افتقد لأبسط قواعد التنظيم ولم يقدم الوجبات الغذائية المتفق عليها.'
+  },
+  'telc-b2-18-fahrradtour': {
+    de: 'Reklamation: Geführte Fahrradtour',
+    ar: 'شكوى وتظلم بخصوص جولة سياحية بالدراجات بسبب رداءة الدراجات المسلَّمة وغياب مرسل الصيانة.'
+  },
+  'telc-b2-19-sprachkurs': {
+    de: 'Beschwerde: Intensiv-Sprachkurs B2',
+    ar: 'شكوى بخصوص كورس لغة مكثف غاب عنه مدرس المادة ولم يتم تسليم الملازم والدعم المتوقع.'
+  },
+  'telc-b2-20-fitnessstudio': {
+    de: 'Beschwerde: Premium Fitnessstudio',
+    ar: 'شكوى وتظلم بخصوص صالة ألعاب رياضية تم سحب رسوم إضافية منها مع تعطل الساونا وجهاز التكييف.'
+  },
+  'telc-b2-21-onlineshopping': {
+    de: 'Beschwerde: Online-Shopping Retoure',
+    ar: 'شكوى ضد متجر تسوق إلكتروني بسبب رفض استرجاع السلع المعيبة وتأخير رد المبالغ المدفوعة.'
+  }
+};
+
+const UI_TRANSLATIONS = {
+  ar: {
+    activeMethodology: "المنهجية النشطة:",
+    timerLabel: "المؤقت:",
+    continuous: "مستمر",
+    showMethodology: "إظهار المنهجية",
+    hideMethodology: "إخفاء المنهجية",
+    fullText: "عرض النص بالكامل",
+    lineByLine: "عرض سطر بسطر (للتركيز)",
+    noMask: "الحفظ الذكي: لا حجب",
+    mask10: "حجب جزء بسيط (10%)",
+    mask25: "حجب متوسط (25%)",
+    mask50: "حجب مكثف (50%)",
+    maskSentence: "إخفاء جمل كاملة عشوائياً",
+    wordPractice: "تمرين الكلمات كلمة بكلمة:",
+    active: "مفعّل ✅",
+    inactive: "مغلق ❌",
+    challengeTitle: "تحدي كتابة الكلمات التفاعلي البطيء (Word-by-Word Practice)",
+    challengeDesc: "هذا النمط يساعدك على تتبع الكلمات بدقة بالغة. تظهر أمامك الكلمة وموضع تتبع الحروف، اكتب الكلمة حرفًا بحرف واضغط Enter للمطابقة الفورية.",
+    originalFullText: "النص الأصلي بالكامل الذي ستتدرب عليه:",
+    startWordPractice: "ابدأ تمرين الكلمات الآن",
+    readyTitle: "جاهز لبدء جلسة الحفظ؟",
+    readyDesc: "الآن سيُعرض النص أعلاه، اكتبه بدقة في صندوق الكتابة لتقييم رتمك وهجاءك مباشرة.",
+    startTraining: "ابدأ التدريب الآن",
+    wordChallengeActive: "تمرين كتابة الكلمات نشط ✍️",
+    currentWord: "الكلمة الحالية لتكتبها (Current Word):",
+    wordLabelInput: "اكتب الكلمة أعلاه ثم اضغط على زر",
+    placeholderInput: "اكتب هنا...",
+    fullTextTrack: "تتبع النص الكامل للمنهجية:",
+    reset: "إعادة ضبط",
+    finishCalculate: "إنهاء وااحتساب النتيجة",
+    originalTemplate: "النموذج الأصلي (Original Template)",
+    trainingActive: "جاري التدريب",
+    intellectualSegmenter: "مُفكّك الأقسام التفاعلي (Kopf/Einleitung...)",
+    arabicTranslationLabel: "ترجمة المنهجية للعربية",
+    hideSegmenter: "إخفاء التقسيم الذكي",
+    hideTranslation: "إخفاء الترجمة",
+    germanColumn: "Deutscher Text (German)",
+    arabicColumn: "الترجمة السطرية الرسمية (Arabic Translation)",
+    unsupportedCustomTrans: "الترجمة السطرية الكاملة لهذه المنهجية المفتوحة أو المخصصة غير متوفرة بشكل مدمج، ولكن يمكنك دراسة نصها مباشرة.",
+    hintBtn: "طلب تلميح (Hint)",
+    wordGuideBtn: "مرشد الحروف والكلمات:",
+    studyFirstTitle: "مستكشف وقارئ المنهجيات المطور 📑 (Study & Understand First)",
+    studyFirstDesc: "اقرأ وافهم النص كلمة بكلمة بسهولة تامة بالنقر على أي كلمة للحصول على ترجمة عربية مصغرة ومباشرة!",
+    interactiveStudyHeading: "القارئ التفاعلي المطور (انقر على أي كلمة للترجمة الفورية):"
+  },
+  de: {
+    activeMethodology: "Aktives Thema:",
+    timerLabel: "Timer:",
+    continuous: "Unbegrenzt",
+    showMethodology: "Thema anzeigen",
+    hideMethodology: "Thema verbergen",
+    fullText: "Kompletten Text anzeigen",
+    lineByLine: "Zeile für Zeile (Fokus)",
+    noMask: "Kluges Lernen: Kein Ausblenden",
+    mask10: "Leichtes Ausblenden (10%)",
+    mask25: "Mittleres Ausblenden (25%)",
+    mask50: "Starkes Ausblenden (50%)",
+    maskSentence: "Zufällige Sätze ausblenden",
+    wordPractice: "Wort-für-Wort-Übung:",
+    active: "Aktiv ✅",
+    inactive: "Deaktiviert ❌",
+    challengeTitle: "Wort-für-Wort-Übung (Word Practice)",
+    challengeDesc: "Dieser Modus hilft Ihnen, Wörter präzise zu schreiben. Geben Sie jedes Wort einzeln ein und drücken Sie die Eingabetaste (Enter), um Fehler sofort farblich zu korrigieren.",
+    originalFullText: "Der vollständige Originaltext zur Übung:",
+    startWordPractice: "Wortübung starten",
+    readyTitle: "Bereit zur Memorierübung?",
+    readyDesc: "Jetzt wird der Text oben angezeigt. Schreiben Sie ihn so genau wie möglich im Eingabefeld darunter, um Präsision zu messen.",
+    startTraining: "Jetzt trainieren",
+    wordChallengeActive: "Wortübung läuft ✍️",
+    currentWord: "Aktuelles Wort zu tippen:",
+    wordLabelInput: "Tippen Sie das Wort oben und drücken Sie",
+    placeholderInput: "Hier tippen...",
+    fullTextTrack: "Fortschritt des gesamten Textes:",
+    reset: "Zurücksetzen",
+    finishCalculate: "Ergebnis auswerten",
+    originalTemplate: "Original-Vorlage",
+    trainingActive: "Übung läuft",
+    intellectualSegmenter: "Interaktiver Struktur-Teiler (Kopf/Einleitung...)",
+    arabicTranslationLabel: "Ins Arabische übersetzen",
+    hideSegmenter: "Teilung verbergen",
+    hideTranslation: "Übersetzung verbergen",
+    germanColumn: "Deutscher Text",
+    arabicColumn: "Arabische Übersetzung",
+    unsupportedCustomTrans: "Eine integrierte Zeilenübersetzung ist für benutzerdefinierte Vorlagen nicht verfügbar, aber Sie können den deutschen Text direkt lernen.",
+    hintBtn: "Tipp anfordern (Hint)",
+    wordGuideBtn: "Buchstaben-Zeiger:",
+    studyFirstTitle: "Themen-Studium & Übersetzung 📑",
+    studyFirstDesc: "Klicken Sie auf ein beliebiges deutsches Wort im Text, um sofort eine integrierte Übersetzung zu erhalten!",
+    interactiveStudyHeading: "Interaktiver Textleser (Klicken Sie auf ein Wort für Übersetzung):"
+  }
+};
+
 interface LearningModePanelProps {
   methodologies: Methodology[];
   selectedText: Methodology | null;
   onSessionComplete: (session: Omit<Session, 'id' | 'timestamp'>) => void;
   onEditMethodology?: (id: string, updates: Partial<Methodology>) => void;
+  appLanguage?: 'ar' | 'de';
 }
 
 export default function LearningModePanel({
@@ -27,6 +403,7 @@ export default function LearningModePanel({
   selectedText,
   onSessionComplete,
   onEditMethodology,
+  appLanguage = 'ar',
 }: LearningModePanelProps) {
   // Select active methodology
   const [activeText, setActiveText] = useState<Methodology | null>(selectedText || methodologies[0] || null);
@@ -63,6 +440,74 @@ export default function LearningModePanel({
 
   // Active line calculation (for lineByLine)
   const [activeLineIndex, setActiveLineIndex] = useState(0);
+
+  // Word study states (Click-to-translate)
+  const [selectedStudyWord, setSelectedStudyWord] = useState<string | null>(null);
+  const [studyTranslation, setStudyTranslation] = useState<string | null>(null);
+
+  const t = UI_TRANSLATIONS[appLanguage];
+
+  const handleStudyWordClick = (rawWord: string) => {
+    const clean = rawWord.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?"\n\r]/g, "").trim();
+    const trans = GERMAN_TO_ARABIC_DICT[clean] || null;
+    setSelectedStudyWord(rawWord);
+    setStudyTranslation(trans);
+  };
+
+  const speakGermanWord = (word: string) => {
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(word);
+      utterance.lang = 'de-DE';
+      utterance.rate = 0.85;
+      window.speechSynthesis.speak(utterance);
+    }
+  };
+
+  const renderInteractiveGermanContent = (content: string) => {
+    const paragraphs = content.split('\n');
+    return (
+      <div className="space-y-3" dir="ltr">
+        {paragraphs.map((paragraph, pIdx) => {
+          const tokens = paragraph.split(/(\s+)/);
+          return (
+            <div key={pIdx} className="leading-relaxed flex flex-wrap gap-y-1 select-none font-sans text-sm md:text-base text-slate-300">
+              {tokens.map((token, tIdx) => {
+                if (/^\s+$/.test(token)) {
+                  return <span key={tIdx} className="whitespace-pre-wrap">{token}</span>;
+                }
+                const cleanWord = token.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?"\n\r]/g, "").trim();
+                const dictTranslation = GERMAN_TO_ARABIC_DICT[cleanWord];
+                const isSelected = selectedStudyWord === cleanWord;
+                const hasTranslation = !!dictTranslation;
+
+                return (
+                  <span
+                    key={tIdx}
+                    onClick={() => {
+                      if (cleanWord.length > 0) {
+                        handleStudyWordClick(token);
+                        speakGermanWord(cleanWord);
+                      }
+                    }}
+                    className={`inline-block relative cursor-pointer px-1 rounded-md transition duration-150 select-none ${
+                      isSelected
+                        ? 'bg-amber-500 font-extrabold text-slate-950 px-1.5 shadow scale-105'
+                        : hasTranslation
+                          ? 'border-b border-dashed border-teal-400 hover:bg-teal-500/10 hover:text-teal-350 bg-teal-500/5'
+                          : 'hover:bg-slate-800 hover:text-slate-200'
+                    }`}
+                  >
+                    {token}
+                  </span>
+                );
+              })}
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -377,7 +822,7 @@ export default function LearningModePanel({
       {/* Upper selector & text settings bar */}
       <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 bg-slate-900/40 p-4 rounded-2xl border border-slate-800" id="options-ribbon">
         <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-          <label className="text-xs font-bold text-slate-300 min-w-[120px] text-right">المنهجية النشطة:</label>
+          <label className="text-xs font-bold text-slate-300 min-w-[120px] text-right">{t.activeMethodology}</label>
           <select
             id="text-selector-learn"
             value={activeText?.id || ''}
@@ -400,7 +845,7 @@ export default function LearningModePanel({
           <div className="flex items-center space-x-1.5 bg-slate-950/40 border border-slate-800 p-1 rounded-xl rtl:space-x-reverse">
             <span className="text-[10px] text-slate-400 font-bold px-1.5 flex items-center gap-1">
               <Timer className="h-3 w-3 text-teal-400" />
-              <span>المؤقت:</span>
+              <span>{t.timerLabel}</span>
             </span>
             <button
               id="timer-inf"
@@ -408,7 +853,7 @@ export default function LearningModePanel({
               disabled={isTraining}
               className={`px-2 py-1 text-[10px] font-bold rounded-lg ${timerOption === 'infinite' ? 'bg-teal-500 text-slate-950 font-black' : 'text-slate-400 hover:text-slate-200'}`}
             >
-              مستمر
+              {t.continuous}
             </button>
             <button
               id="timer-15"
@@ -436,7 +881,7 @@ export default function LearningModePanel({
               className={`flex items-center gap-1 px-3 py-1 text-[10px] font-bold rounded-lg ${showMethodology ? 'bg-teal-500 text-slate-950 font-black' : 'text-slate-400 hover:text-slate-200'}`}
             >
               <Eye className="h-3 w-3" />
-              <span>إظهار المنهجية</span>
+              <span>{t.showMethodology}</span>
             </button>
             <button
               id="toggle-hide-methodology"
@@ -444,7 +889,7 @@ export default function LearningModePanel({
               className={`flex items-center gap-1 px-3 py-1 text-[10px] font-bold rounded-lg ${!showMethodology ? 'bg-teal-500 text-slate-950 font-black' : 'text-slate-400 hover:text-slate-200'}`}
             >
               <EyeOff className="h-3 w-3" />
-              <span>إخفاء المنهجية</span>
+              <span>{t.hideMethodology}</span>
             </button>
           </div>
 
@@ -456,8 +901,8 @@ export default function LearningModePanel({
             disabled={isTraining || isWordPracticeActive}
             className="bg-slate-950 border border-slate-800 text-slate-200 text-[10px] font-semibold rounded-xl px-2.5 py-1.5 cursor-pointer focus:ring-1 focus:ring-teal-400"
           >
-            <option value="full">عرض النص بالكامل</option>
-            <option value="lineByLine">عرض سطر بسطر (للتركيز)</option>
+            <option value="full">{t.fullText}</option>
+            <option value="lineByLine">{t.lineByLine}</option>
           </select>
 
           {/* Smart Masking Options */}
@@ -471,11 +916,11 @@ export default function LearningModePanel({
             disabled={isTraining || isWordPracticeActive}
             className="bg-slate-950 border border-slate-800 text-slate-200 text-[10px] font-semibold rounded-xl px-2.5 py-1.5 cursor-pointer focus:ring-1 focus:ring-teal-400"
           >
-            <option value="none">الحفظ الذكي: لا حجب</option>
-            <option value="percent10">حجب جزء بسيط (10%)</option>
-            <option value="percent25">حجب متوسط (25%)</option>
-            <option value="percent50">حجب مكثف (50%)</option>
-            <option value="sentenceHide">إخفاء جمل كاملة عشوائياً</option>
+            <option value="none">{t.noMask}</option>
+            <option value="percent10">{t.mask10}</option>
+            <option value="percent25">{t.mask25}</option>
+            <option value="percent50">{t.mask50}</option>
+            <option value="sentenceHide">{t.maskSentence}</option>
           </select>
 
           {/* Word practicing mode switcher */}
@@ -494,7 +939,7 @@ export default function LearningModePanel({
             title="التدريب التفاعلي المتزامن كلمة بكلمة مع كشف الأخطاء الإملائية بالأحمر"
           >
             <Keyboard className="h-3.5 w-3.5" />
-            <span>تمرين الكلمات كلمة بكلمة: {isWordPracticeActive ? 'مفعّل ✅' : 'مغلق ❌'}</span>
+            <span>{t.wordPractice} {isWordPracticeActive ? t.active : t.inactive}</span>
           </button>
         </div>
       </div>
@@ -900,31 +1345,116 @@ export default function LearningModePanel({
                   </div>
                 </div>
               ) : (
-                /* Standard Full German View (rendered when translation is off) */
-                <div 
-                  className="text-left font-sans select-none leading-relaxed text-slate-300 prose prose-invert max-w-none text-sm break-words whitespace-pre-wrap animate-fade-in"
-                  dir="ltr"
-                >
-                  {displayMode === 'lineByLine' ? (
-                    <div className="space-y-2">
-                      {originalLines.map((line, index) => {
-                        const isActive = index === activeLineIndex;
-                        if (!isActive && isTraining) return null; // Show only active target line under line-by-line in training
-                        return (
-                          <div 
-                            key={index} 
-                            className={`p-2 rounded-lg transition ${
-                              isActive ? 'bg-teal-500/10 text-teal-350 border border-teal-500/15 font-bold' : 'text-slate-500 opacity-60'
-                            }`}
-                          >
-                            {maskMode === 'none' ? line : maskedLines[index]}
+                /* Standard Full German View or Interactive Study Mode */
+                <div className="animate-fade-in text-left">
+                  {!isTraining ? (
+                    <div className="space-y-6">
+                      {/* Topic Illustration & Context Header */}
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 bg-slate-950/40 p-4 rounded-2xl border border-slate-800/50">
+                        {/* Illustration Frame */}
+                        <div className="md:col-span-1 h-36 md:h-44 rounded-xl overflow-hidden relative border border-slate-800/85 shadow-md">
+                          <img 
+                            src={resolvedText ? (TOPIC_IMAGES[resolvedText.id] || DEFAULT_TOPIC_IMAGE) : DEFAULT_TOPIC_IMAGE} 
+                            alt={resolvedText?.title} 
+                            className="w-full h-full object-cover select-none"
+                            referrerPolicy="no-referrer"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/25 to-transparent"></div>
+                          <span className="absolute bottom-2 right-2 text-[9px] bg-teal-500/90 text-slate-950 font-black px-2 py-0.5 rounded-full shadow">
+                            B2 MODEL TOPIC
+                          </span>
+                        </div>
+
+                        {/* Topic Context Details */}
+                        <div className="md:col-span-2 flex flex-col justify-center text-right space-y-2" dir="rtl">
+                          <span className="text-[10px] text-teal-400 font-extrabold tracking-wider uppercase">المنهجية المختارة للدراسة والقراءة</span>
+                          <h3 className="text-base font-black text-slate-100">{resolvedText?.title}</h3>
+                          <p className="text-xs text-slate-300 leading-relaxed font-semibold">
+                            {resolvedText ? (TOPIC_DESCRIPTIONS[resolvedText.id]?.ar || 'دراسة ومراجعة منهجية التدريب المحددة للاستعداد للاختبار.') : ''}
+                          </p>
+                          
+                          <div className="flex flex-wrap gap-2 justify-start pt-1 font-sans text-[10.5px]">
+                            <span className="px-2 py-0.5 rounded bg-slate-955 border border-slate-850 text-slate-400 font-mono">
+                              {resolvedText?.content.split(/\s+/).filter(Boolean).length} كلمة ألمانية
+                            </span>
+                            <span className="px-2 py-0.5 rounded bg-slate-955 border border-slate-850 text-amber-400 font-bold">
+                              انقر على أي كلمة للترجمة وسماع الصوت 🔊
+                            </span>
                           </div>
-                        );
-                      })}
+                        </div>
+                      </div>
+
+                      {/* Interactive Word-by-Word Reader Panel */}
+                      <div className="p-5 bg-slate-950/30 border border-slate-900 rounded-2xl space-y-2">
+                        <span className="text-[10.5px] font-bold text-slate-400 block text-right">القارئ التفاعلي المطور (انقر على أي كلمة للترجمة الفورية):</span>
+                        {resolvedText && renderInteractiveGermanContent(resolvedText.content)}
+                      </div>
+
+                      {/* iOS Lookup dictionary details card */}
+                      {selectedStudyWord && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="p-4 rounded-2xl bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 border border-teal-500/25 shadow-lg flex flex-col md:flex-row items-center justify-between gap-3 text-right"
+                          dir="rtl"
+                        >
+                          <div className="flex items-center gap-3 w-full md:w-auto justify-end">
+                            <div className="h-9 w-9 rounded-full bg-teal-500/10 flex items-center justify-center text-teal-400 shrink-0">
+                              <Languages className="h-4.5 w-4.5" />
+                            </div>
+                            <div>
+                              <span className="text-[9.5px] text-slate-550 font-bold block">مساعد الترجمة الفورية للأيفون</span>
+                              <div className="flex items-center gap-2 justify-end">
+                                <span className="text-sm font-bold text-teal-300 font-mono tracking-wide mt-0.5" dir="ltr">{selectedStudyWord}</span>
+                                <button 
+                                  onClick={() => speakGermanWord(selectedStudyWord)}
+                                  className="p-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-350 hover:text-slate-100 transition text-[11px] font-sans flex items-center gap-0.5"
+                                  title="استمع للنطق الألماني الصحيح"
+                                >
+                                  <span>اسمع</span>
+                                  <span>🔊</span>
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="text-right w-full md:w-auto">
+                            <span className="text-[9.5px] text-slate-550 font-bold block">الترجمة العربية بالقاموس</span>
+                            <span className="text-sm font-extrabold text-slate-200 font-sans leading-relaxed">
+                              {studyTranslation || 'غير متوفرة بالقاموس المدمج - انقر للفظ'}
+                            </span>
+                          </div>
+                        </motion.div>
+                      )}
                     </div>
                   ) : (
-                    <div className="font-sans animate-fade-in">
-                      {maskMode === 'none' ? resolvedText?.content : maskedContent}
+                    /* Training Mode Standard View */
+                    <div 
+                      className="text-left font-sans select-none leading-relaxed text-slate-300 prose prose-invert max-w-none text-sm break-words whitespace-pre-wrap animate-fade-in"
+                      dir="ltr"
+                    >
+                      {displayMode === 'lineByLine' ? (
+                        <div className="space-y-2">
+                          {originalLines.map((line, index) => {
+                            const isActive = index === activeLineIndex;
+                            if (!isActive && isTraining) return null; // Show only active target line under line-by-line in training
+                            return (
+                              <div 
+                                key={index} 
+                                className={`p-2 rounded-lg transition ${
+                                  isActive ? 'bg-teal-500/10 text-teal-350 border border-teal-500/15 font-bold' : 'text-slate-500 opacity-60'
+                                }`}
+                              >
+                                {maskMode === 'none' ? line : maskedLines[index]}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      ) : (
+                        <div className="font-sans">
+                          {maskMode === 'none' ? resolvedText?.content : maskedContent}
+                        </div>
+                      )}
                     </div>
                   )}
 

@@ -4,16 +4,56 @@
  */
 
 import React from 'react';
-import { Award, BookOpen, Layers, BarChart2, Keyboard, Settings, Sparkles } from 'lucide-react';
+import { Award, BookOpen, Layers, BarChart2, Keyboard, Settings, Sparkles, Languages } from 'lucide-react';
 
 interface HeaderProps {
   currentView: 'learn' | 'exam' | 'folders' | 'history';
   onViewChange: (view: 'learn' | 'exam' | 'folders' | 'history') => void;
   theme: 'dark' | 'light' | 'emerald';
   onThemeChange: (theme: 'dark' | 'light' | 'emerald') => void;
+  appLanguage: 'ar' | 'de';
+  onChangeLanguage: (lang: 'ar' | 'de') => void;
 }
 
-export default function Header({ currentView, onViewChange, theme, onThemeChange }: HeaderProps) {
+const HEADER_TEXTS = {
+  ar: {
+    subtitle: "محفظ منهجيات ومُدرّب الكتابة B2",
+    folders: "المنهجيات والمجلدات",
+    learn: "وضع الحفظ",
+    exam: "وضع الامتحان",
+    history: "سجل التقدم",
+    stats: "الإحصائيات",
+    precision: "دقة 100%",
+    themeDark: "🌑 مظلم (Default)",
+    themeLight: "☀️ مضيء (Light)",
+    themeEmerald: "🟢 غابات (Emerald)",
+    langLabel: "لغة التطبيق:"
+  },
+  de: {
+    subtitle: "B2 Schreib-Memorizer & Trainer",
+    folders: "Themen & Ordner",
+    learn: "Lernmodus",
+    exam: "Prüfungsmodus",
+    history: "Fortschritt",
+    stats: "Statistik",
+    precision: "100% Präzision",
+    themeDark: "🌑 Dunkel",
+    themeLight: "☀️ Hell",
+    themeEmerald: "🟢 Smaragd",
+    langLabel: "Sprache:"
+  }
+};
+
+export default function Header({ 
+  currentView, 
+  onViewChange, 
+  theme, 
+  onThemeChange,
+  appLanguage,
+  onChangeLanguage
+}: HeaderProps) {
+  const t = HEADER_TEXTS[appLanguage];
+
   return (
     <header className="border-b border-slate-700/50 bg-slate-900/60 backdrop-blur-md sticky top-0 z-40">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -27,7 +67,7 @@ export default function Header({ currentView, onViewChange, theme, onThemeChange
               <span className="font-sans text-xl font-black tracking-tighter text-white flex items-center gap-1.5">
                 TELC<span className="text-teal-400 font-black">MEMO</span><span className="text-slate-400 text-sm font-medium tracking-normal">rizer</span>
               </span>
-              <p className="text-[9px] uppercase tracking-[0.15em] font-bold text-slate-400">محفظ منهجيات ومُدرّب الكتابة B2</p>
+              <p className="text-[9px] uppercase tracking-[0.15em] font-bold text-slate-400">{t.subtitle}</p>
             </div>
           </div>
 
@@ -43,7 +83,7 @@ export default function Header({ currentView, onViewChange, theme, onThemeChange
               }`}
             >
               <Layers className="h-4 w-4" />
-              <span className="hidden sm:inline">المنهجيات والمجلدات</span>
+              <span className="hidden sm:inline">{t.folders}</span>
             </button>
 
             <button
@@ -56,7 +96,7 @@ export default function Header({ currentView, onViewChange, theme, onThemeChange
               }`}
             >
               <BookOpen className="h-4 w-4" />
-              <span>وضع الحفظ</span>
+              <span>{t.learn}</span>
             </button>
 
             <button
@@ -69,7 +109,7 @@ export default function Header({ currentView, onViewChange, theme, onThemeChange
               }`}
             >
               <Award className="h-4 w-4" />
-              <span>وضع الامتحان</span>
+              <span>{t.exam}</span>
             </button>
 
             <button
@@ -82,27 +122,37 @@ export default function Header({ currentView, onViewChange, theme, onThemeChange
               }`}
             >
               <BarChart2 className="h-4 w-4" />
-              <span className="hidden sm:inline">سجل التقدم</span>
-              <span className="sm:hidden">الإحصائيات</span>
+              <span className="hidden sm:inline">{t.history}</span>
+              <span className="sm:hidden">{t.stats}</span>
             </button>
           </nav>
 
-          {/* Theme Switcher */}
-          <div className="flex items-center space-x-2 rtl:space-x-reverse" id="theme-selectors">
-            <div className="hidden lg:flex items-center space-x-1 border border-slate-800 rounded-full px-2 py-1 bg-slate-950/40 text-xs text-slate-400 gap-1 rtl:space-x-reverse">
-              <Sparkles className="h-3.5 w-3.5 text-teal-400" />
-              <span>TELC B2 دقة 100%</span>
+          {/* Theme & Language Switcher */}
+          <div className="flex items-center gap-2" id="header-settings-bar">
+            {/* Language Selection */}
+            <div className="flex items-center bg-slate-950/50 border border-slate-800 rounded-xl px-2 py-1 gap-1">
+              <Languages className="h-3.5 w-3.5 text-teal-400" />
+              <select
+                id="language-select"
+                value={appLanguage}
+                onChange={(e) => onChangeLanguage(e.target.value as 'ar' | 'de')}
+                className="bg-transparent text-slate-200 text-xs font-bold outline-none border-none cursor-pointer pr-1"
+              >
+                <option value="ar" className="bg-slate-900 text-slate-100">العربية 🇸🇦</option>
+                <option value="de" className="bg-slate-900 text-slate-100">Deutsch 🇩🇪</option>
+              </select>
             </div>
 
+            {/* Theme select */}
             <select
               id="theme-select"
               value={theme}
               onChange={(e) => onThemeChange(e.target.value as 'dark' | 'light' | 'emerald')}
-              className="bg-slate-900 border border-slate-850 text-slate-200 text-xs rounded-xl px-2.5 py-1.5 font-bold outline-none focus:ring-1 focus:ring-teal-400 cursor-pointer"
+              className="bg-slate-900 border border-slate-850 text-slate-200 text-xs rounded-xl px-2.5 py-1.5 font-bold outline-none focus:ring-1 focus:ring-teal-400 cursor-pointer hidden md:block"
             >
-              <option value="dark">🌑 مظلم (Default)</option>
-              <option value="light">☀️ مضيء (Light)</option>
-              <option value="emerald">🟢 غابات (Emerald)</option>
+              <option value="dark">{t.themeDark}</option>
+              <option value="light">{t.themeLight}</option>
+              <option value="emerald">{t.themeEmerald}</option>
             </select>
           </div>
         </div>

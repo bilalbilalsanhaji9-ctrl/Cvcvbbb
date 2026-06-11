@@ -2,7 +2,7 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Cairo", "Inter", system-ui, -apple-system, sans-serif;
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", "Cairo", "Inter", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", Courier, monospace;
 }
 
